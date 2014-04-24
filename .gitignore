@@ -1,8 +1,64 @@
-# History files
-.Rhistory
+title: "Project Stat597A. n\ Bioinformatics for High Throughput Experiments"
+author: "Hannier Pulido & Yong Jung"
+date: "April 22, 2014"
+output: pdf_document
+---
 
-# Example code in package build process
-*-Ex.R
+# **Objective**
+The aim of this project is to identify a gene signature for the four different types of medulloblastoma described by (Robinson et al., 2012). The analysis reveals a list of genes whose expression is correlated with the medulloblastoma subgroups
 
-# R data files from past sessions
-.Rdata
+# **Introduction**
+In order to classify the samples in the four different types of medulloblastoma, we used the expression profiling by array available at the Gene Expression Omnibus website with the accession number GSE37418. A total of 54,675 genes from 76 samples were analyzed using Bioconductor and Random Forest (Breiman, 2001) for classification. 
+
+(Develop more introduction with the results obtained from the annotation and gene ontology… what did we discover? What is the gene signature for each of the four groups?)
+
+# **Step 1. Load libraries and CEL files**
+```{r Step 1 Install packages, warning=FALSE, message=FALSE}
+source("http://www.bioconductor.org/biocLite.R")
+biocLite("simpleaffy")
+biocLite("limma")
+biocLite("affy")
+biocLite("affy")
+biocLite("hexbin")
+biocLite("annotate")
+biocLite("hgu133plus2.db") 
+biocLite("GOstats")
+biocLite("GO.db")
+biocLite("genefilter")
+
+# Install microarray analysis packages
+require("simpleaffy")
+require("limma")
+require("affy")
+require("hexbin")
+require("annotate")
+require("hgu133plus2.db") # Affymetrix Human Genome U133 Plus 2.0 Array annotation datar
+require("genefilter")
+require("simpleaffy")
+require("GOstats")
+require("GO.db")
+require("genefilter")
+
+# Install Random Forest packages
+library(RRF)
+library(randomForest)
+library(varSelRF)
+library(lattice)
+library(Boruta)
+
+# Other packages
+library(scatterplot3d)
+library(mclust)
+library(gplots)
+library(graphics)
+library(ClassDiscovery)
+library(lattice)
+library(xtable)
+
+# Upload the metadata describing samples in the experiment with information of subroup, age, sex, ethnic and Mstage 
+phenoData <- read.AnnotatedDataFrame("annotation.txt", header = TRUE, sep = "\t", row.names = 1)
+
+# Load raw CEL files using ReadAffy ("affy")
+CELdata <- ReadAffy(celfile.path = 'MicroarrayData', phenoData = phenoData)
+# cancer.rma <- rma(CELdata) # Optional step for background correction using RMA
+```
