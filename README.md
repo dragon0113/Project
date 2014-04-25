@@ -5,6 +5,9 @@ date: "April 22, 2014"
 output: pdf_document
 ---
 
+This report correspond to the project for the class Stat597A Bioinformatics for High Throuhput Experiments during the Spring semester in 2014. The project is a collaboration between Hannier Pulido & Yong Jung  
+
+
 # **Objective**
 The aim of this project is to identify a gene signature for the four different types of medulloblastoma described by (Robinson et al., 2012). The analysis reveals a list of genes whose expression is correlated with the medulloblastoma subgroups
 
