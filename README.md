@@ -21,7 +21,7 @@ The following is the workflow of the data analysis and the person responsible fo
     *MVA plots
 
 6) Exploratory analysis  **(HP)**  
-    *HCA
+    *HCA  
     *PCA
 
 7) Random Forest **(HP)**  
