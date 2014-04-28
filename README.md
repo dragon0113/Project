@@ -4,31 +4,31 @@ The following is the workflow of the data analysis and the person responsible fo
 
 1) Access to CEL files **(HP)**  
 2) Quality Assessment on raw data **(HP)**   
-    * RNA degradation plots
-    * Boxplots
-    * Density plots
+    * RNA degradation plots  
+    * Boxplots  
+    * Density plots  
 3) Preprocess data **(HP)**    
-    * Background correction and normalization
-    * Filtering absent genes
-    * Remove outliers and unidentified groups
+    * Background correction and normalization  
+    * Filtering absent genes  
+    * Remove outliers and unidentified groups  
 
 4) Preliminary analysis **(YJ)**  
-    * K-means clustering
+    * K-means clustering  
 
 5) Quality assessment of filtered data **(HP)**    
-    *Boxplots
-    *Density plots
-    *MVA plots
+    *Boxplots  
+    *Density plots  
+    *MVA plots  
 
 6) Exploratory analysis  **(HP)**  
-    *HCA  
-    *PCA
+    *HCA    
+    *PCA  
 
 7) Random Forest **(HP)**  
 
 8) Variable selection **(HP)**  
 
-9) Visualization of results **(HP)**  
+9) Visualization of results **(YJ & HP)**  
 
 10) Functional enrichment analysis using Gene Ontology  **(YJ)**  
 
