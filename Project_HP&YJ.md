@@ -1,7 +1,7 @@
 ---
 title: "Project_Hannier&Yong_Github_042514"
 author: "Hannier Pulido"
-date: "Monday, April 25, 2014"
+date: "April 25, 2014"
 output: pdf_document
 ---
 
