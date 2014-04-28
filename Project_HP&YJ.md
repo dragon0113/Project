@@ -1,7 +1,7 @@
 ---
-title: "Project Stat597A. n\ Bioinformatics for High Throughput Experiments"
-author: "Hannier Pulido & Yong Jung"
-date: "April 22, 2014"
+title: "Project_Hannier&Yong_Github_042514"
+author: "Hannier Pulido"
+date: "Monday, April 28, 2014"
 output: pdf_document
 ---
 
@@ -13,8 +13,7 @@ In order to classify the samples in the four different types of medulloblastoma,
 
 (Develop more introduction with the results obtained from the annotation and gene ontology… what did we discover? What is the gene signature for each of the four groups?)
 
-# **Step 1. Load libraries and CEL files**
-```{r Step 1 Install packages, warning=FALSE, message=FALSE}
+```{r}
 source("http://www.bioconductor.org/biocLite.R")
 biocLite("simpleaffy")
 biocLite("limma")
@@ -63,13 +62,9 @@ phenoData <- read.AnnotatedDataFrame("annotation.txt", header = TRUE, sep = "\t"
 CELdata <- ReadAffy(celfile.path = 'MicroarrayData', phenoData = phenoData)
 # cancer.rma <- rma(CELdata) # Optional step for background correction using RMA
 ```
-https://github.com/hannierpulido/Project.wiki.git
-# **Step 2. Quality assessment of raw data**
-We assess the quality of the raw data before correcting and normalizing the data for further analysis. This analysis allow us to detect abnormal arrays on the data
 
 ## **2.1 Boxplots of raw data**
-```{r Step 2 Boxplots of raw data, warning=FALSE, message=FALSE}
-# Generates a vector for colours
+```{r }
 pdata <- pData(CELdata)
 
 color <- NULL
@@ -92,7 +87,6 @@ for(i in 1:length(pdata$subgroup)) {
   }
 }
 
-# Creates a vector with the name of genes extracted from the CELdata object
 D <- data.frame(sampleNames(CELdata))
 D$genLabel <- lapply(strsplit(as.character(D$sampleNames.CELdata.), "\\_"), "[", 1) 
 
@@ -104,7 +98,7 @@ legend(-2, 16, horiz = TRUE, c("G3", "G4", "SHH", "SHH_OUTLIER", "U", "WNT"),
 ```
 
 ## **2.2 Density plots of raw data**
-```{r Step 2 Density plots of raw data, warning=FALSE, message=FALSE}
+```{r }
 hist(CELdata, type = "l", col = color, main = "Histogram of raw data")
 legend("topright", c("G3", "G4", "SHH", "SHH_OUTLIER", "U", "WNT"), 
        fill = c("green3", "cyan2", "orange", "yellow","magenta", "firebrick1") )
@@ -112,33 +106,18 @@ legend("topright", c("G3", "G4", "SHH", "SHH_OUTLIER", "U", "WNT"),
 
 ## **2.3 RNA degradation Plot**
 In this plot, we are looking if any arrays are really different from the others. 
-```{r step 2 RNA degradation plot, warning=FALSE, message=FALSE}
+```{r}
 RNA.deg <- AffyRNAdeg(CELdata)
 plotAffyRNAdeg(RNA.deg, col = color)
 legend("topleft", c("G3", "G4", "SHH", "SHH_OUTLIER", "U", "WNT"), 
        fill = c("green3", "cyan2", "orange", "yellow","magenta", "firebrick1") )
 ```
-```
-Conclusion: data needs to be normalized before further analysis
 
-# **3. Preprocess: Background correction and normalization**
-The expression data were filtered to remove any probe sets that failed to show significat variation in expression across the data set (Absent genes.
-Then, we used the function **rma** (*affy*) to perform RMA background correction and quantile normalization.   
-Since we are only interested in the four medulloblastoma groups originally described by the authors, the unidentified groups and one outlier (labeled by the author) were not considered for further analysis.  
-
-These two filtered steps reduced the complexity of the data from 76 samples and 54,675 probe sets to 73 samples and  47,330 probe sets
-```{r Step 3 Preprocess, warning=FALSE, message=FALSE}
-# Get the ExpressionSet object using RMA background correction and quantile normalization
+# **Step 3. Preprocess**
+```{r}
 cancer.rma <- rma(CELdata)
 dim(cancer.rma)
 
-#===============================================================================
-#        Remove absent genes (No variation across any probe sets)
-#===============================================================================
-# The expression profile data is improved by filtering out the absent genes identified by *mas5calls*
-# Mas5calls returns the presence/absence states of all genes in each array
-
-# Performs the Wilcoxon signed rank-based gene expression presence/absence
 eset.mas5 <- mas5calls(CELdata)
 
 # Creates a function to remove the absent genes
@@ -148,68 +127,38 @@ mascallsfilter <- function(cutoff = "A", number){
           }
     } 
 
-# Filtering the absent genes       
 m5cfun <- mascallsfilter(number = dim(eset.mas5)[2])     
 mcfun <- filterfun(m5cfun)
 mcsub <- genefilter(eset.mas5, mcfun)
 sum(mcsub) # 47330
  
-# subset of the cancer.rma ExpressionSet (it no longer has absent genes)
 cancer.sub1 <- cancer.rma[mcsub,]
 dim(cancer.sub1)        # 47330    76
-# After the gene filtering we reduced the dimensions of the database from 54,675 to 47,330 genes
-
-#===============================================================================
-#        Remove "SHH_OUTLIER" & "U"
-#===============================================================================
 cancer.sub <- get.array.subset.affybatch(cancer.sub1, "subgroup", c("G3", "G4", "SHH", "WNT"))
 dim(cancer.sub)
 
-# Creates a vector with the name of genes extracted from the cancer.sub object
 C <- data.frame(sampleNames(cancer.sub))
 C$genLabel <- lapply(strsplit(as.character(C$sampleNames.cancer.sub.), "\\_"), "[", 1) 
 
-# Change the sample names in the cancer.sub object
 sampleNames(cancer.sub) <- as.character(C$genLabel)
-
-# We will be working with **cancer.sub** from now on
 ```
 
-# **Step 4. Preliminary analysis**
-A clustering analysis of k-means using 2 and 4 groups were performed to explore the association between the resulting cluster sets and the known cancer subgroups.
-
-We used Fisher's exact test to analyze the difference between the 2 and 4 clustering and decided to use 4 groups
-```{r Step 4 Kmeans clustering, warning=FALSE, message=FALSE}
-# Extracts metadata from cancer.sub expressionSet
+# **Step 4. Preliminary**
+```{r}
 pdata <- pData(cancer.sub)
 expr <- data.frame(exprs(cancer.sub)) # Expression data
 label <- as.vector(pData(cancer.sub)$subgroup) # character vector for the subgroups
-
-# kmeans for 2 clusters
 cluster_2 <- kmeans(t(expr), iter.max = 1000, 2)$cluster
-
-# Combine metadata with cluster for 2 kmeans
 res_2 <- cbind(pdata, cluster_2)
-# write.table(res_2, file = "Cluster_2_Annotation.txt", sep = '\t')
 table(res_2$subgroup, res_2$cluster)
-
-# kmeans for 4 clusters
 cluster_4 <- kmeans(t(expr), iter.max = 1000, 4)$cluster
 
-# Combine metadata with cluster for 4 kmeans
 res_4 <- cbind(pdata, cluster_4)
-# write.table(res_4, file = "Cluster_4_Annotation.txt", sep = '\t')
 table(res_4$subgroup, res_4$cluster)
 
-# Fisher's exact test
 fisher.test(table(res_2$subgroup, res_2$cluster_2), workspace=2e9)
 fisher.test(table(res_4$subgroup, res_4$cluster_4), workspace=2e9)
 
-#===============================================================================
-#        MDS plot for k-means
-#===============================================================================
-
-# Generates a new vector for colors
 color <- NULL
 for(i in 1:length(pdata$subgroup)) {
   clas <- pdata$subgroup[i]
@@ -226,7 +175,6 @@ for(i in 1:length(pdata$subgroup)) {
   }
 }
 
-# Generates the distance matrix
 dist_res <- dist(t(expr))
 mds<-cmdscale(dist_res) # Principal coordinates analysis for the distance matrix
 x<-mds[,1]
@@ -236,10 +184,8 @@ plot(x, y, type = 'n', main = "MDS plot according to a k-means result")
 text(x, y, label, col = color, cex = 1, font = 2)
 ```
 
-# **Step 5. Quality assessment of filtered data**
-
 ## **5.1 Boxplots of filtered data**
-```{r Step 5 Boxplot filtered data, warning=FALSE, message=FALSE}
+```{r}
 boxplot(exprs(cancer.sub), col = color, las = 3, xaxt = "n", main = "Boxplot of filtered data")
 axis(1, at = 1:73, labels = C$genLabel, las = 3, cex.axis = 0.6)
 legend(20, 15, horiz = TRUE, bg = "white", c("G3", "G4", "SHH", "WNT"), 
@@ -247,7 +193,7 @@ legend(20, 15, horiz = TRUE, bg = "white", c("G3", "G4", "SHH", "WNT"),
 ```
 
 ## **5.2 Density plots of filtered data**
-```{r Step 5 Density plots, , warning=FALSE, message=FALSE}
+```{r}
 plot(density(expr[, 1]), col = color[[1]], ylim = c(0, 0.25), xlab = "", 
      main = "Histogram of filtered data")
 for(i in 2:ncol(expr)) lines(density(expr[, i]), col = color[i])
@@ -256,48 +202,36 @@ legend("topright", c("G3", "G4", "SHH", "WNT"),
 ```
 
 ## **5.3 MVA plots for filtered data**
-```{r step 5,  warning=FALSE, message=FALSE}
-# Obtain the number of samples for the different groups
+```{r}
 which(pdata$subgroup == "G3") # Returns the number of columns with samples G3
 which(pdata$subgroup == "G4") # Returns the number of columns with samples G4
 which(pdata$subgroup == "SHH") # Returns the number of columns with samples SHH
 which(pdata$subgroup == "WNT") # Returns the number of columns with samples WNT
 
-# MVA plot for four arrays for the group G3
 mva.pairs(expr[, c(9, 23, 46, 61)], col = color, cex = 1, 
           main = "MVA plot for 4 arrays of G3") 
 
-# MVA plot for four arrays for the group G4
 mva.pairs(exprs(cancer.sub)[, c(1, 33, 27, 56)], col = color, cex = 1, 
           main = "MVA plot for 4 arrays of G4") 
 
-# MVA plot for four arrays for the group SHH
 mva.pairs(exprs(cancer.sub)[, c(5, 31, 42, 71)], col = color, cex = 1, 
           main = "MVA plot for 4 arrays of SHH") 
 
-# MVA plot for four arrays for the group WNT
 mva.pairs(exprs(cancer.sub)[, c(3, 47, 62, 64)], col = color, cex = 1,
           main = "MVA plot for 4 arrays of WNT") 
 ```
 
-# **Step 6. Exploratory analysis of the pre-processed data**
-We used an unsupervised 2-D hierarchical clustering (HCA) to assess the major grouping of the four types of medulloblastoma based only on their gene expression profiles.
-This exploratory analysis supports the K-means clustering previously performed in step
-
 ## **6.1 Hierarchical clustering**
-```{r step 6 HCA,  warning=FALSE, message=FALSE}
+```{r }
 A <- t(expr)
 dim(A)
 
 label <- as.vector(pData(cancer.sub)$subgroup)
 
-# Computes the distance matrix
 my.dist <- function(x) dist(x, method = "euclidean")
 
-# Hierarchical clustering on the filtered data
 my.hclust <- function(d) hclust(d, method = "ward")
 
-# Generates Hierarchical cluster analysis dendrogram
 d <- as.dist(dist(A, method = "euclidean"))
 fit.h <- hclust(d, method = "ward")
 plotColoredClusters(fit.h, labs = label, cols = color, cex = 0.8, 
@@ -305,7 +239,7 @@ plotColoredClusters(fit.h, labs = label, cols = color, cex = 0.8,
 ```
 
 ## **6.2 PCA**
-```{r step 6 PCA,  warning=FALSE, message=FALSE}
+```{r}
 pca <- prcomp(A, scale = T)
 summary(pca)
 scatterplot3d(pca$x[, 1:3], pch = 20, cex.symbols = 2, color = color, 
@@ -313,93 +247,34 @@ scatterplot3d(pca$x[, 1:3], pch = 20, cex.symbols = 2, color = color,
 legend(5.5, 3, c("G3", "G4", "SHH", "WNT"), 
        fill = c("green3", "cyan2", "orange", "firebrick1") )
 ```
-Both, the PCA and HCA imply that the samples are clustered in four different groups, which agrees with the original subgrouping
+
 
 
 # **Step 7. Random Forest**
-The genes selected as important features by the random forest are the genes that support the prediction of the outcome, i.e. the separation of the four groups.
-We can subset the data to only inlclude the most important variables and use that with another model (like ANOVA, GLM).  
-The measure of importance means that if the variable is not important (the null hypothesis), then rearranging the values of that variable will not degrade prediction accuracy.
-```{r Step 7 RF,  warning=FALSE, message=FALSE}
+```{r}
 subgroup <- factor(pdata$subgroup)
-# Tune Random Forest to get the right mtry for the lowest OOB
-set.seed(666)
-tuneRRF(t(exprs(cancer.sub)), factor(subgroup)) # for mtry = 217, the OOB is 9.59%
-
-# Computes the random forest
-set.seed(666)
 rf <- randomForest(t(exprs(cancer.sub)), factor(subgroup), mtry = 217, ntree = 500,
                    importance = TRUE, proximity = TRUE) 
 
-# Plot the error rage (y-axis) vs the number of trees
 colRF <- c("black", "green3", "cyan2", "orange", "firebrick1")
 plot(rf, col = colRF, main = "random Forest error rate")
 legend("topright", colnames(rf$err.rate), col = colRF, fill = colRF)
 
-# Plot the clustering resulting from Random Forest
-randomForest:::MDSplot(rf, factor(subgroup), main = "Clustering plot for Random Forest",
-                       palette = c("green3", "cyan2", "orange", "firebrick1"), cex = 2)
-legend("topleft", horiz = TRUE, bg = "white", c("G3", "G4", "SHH", "WNT"), 
-       fill = c("green3", "cyan2", "orange", "firebrick1") )
-```
-
-# Step 8. Gene Signature detection
-After fitting the Random Forest model, two approaches were used for the variable selection:
- 
-- **VarSelRF** Uses the OOB error as minimization criterion. It carry out variable elimination of the least important variables
- 
-- **Boruta** inds all relevant genes on the learning algorithm (RF) that are “biologically” related to the medulloblastoma groups. Uses a p-value cut-off of 0.05
-```{r step 8 Gene Signature detection, warning=FALSE, message=FALSE}
-# Variable selection from random forest using OOB error
-# This variable selection is performed using the OOB error as minimization criterion. 
-set.seed(666)
 rf.vs1 <- varSelRF(t(exprs(cancer.sub)), factor(subgroup))
 
-# Get the most important genes according to VarSelRF
+# VarSelRF
 Best.vars <- data.frame(rf.vs1$selected.vars)
 colnames(Best.vars) <- "Best"
 head(Best.vars)
 dim(Best.vars) # 58 genes are selected by VarSelRF
 
-#===============================================================================
-#        Plot of the importance measure for the first 500 genes
-#===============================================================================
 
-# Getting the variable importance values (MeanDecreaseAccuracy from varSelRF)
-imp <- rf.vs1$firstForest$importance
-imp2 <- sort(imp[, 5], decreasing = TRUE) 
-
-var.imp <- dotplot(sort(imp2[1:500]), 
-                   main = "Important genes for classifying four medulloblastoma groups",
-                   scales = list(y = list(cex = 0.5)),
-                   xlab = list(label = "Mean Decrease of Accuracy", cex = 1))
-
-update(var.imp, panel = function(...) {
-  panel.abline(h = 380, v = 0.0005, lty = "longdash", col = "red", lwd = 2)
-  panel.xyplot(...)
-})
-
-# This plot is showing the first 500 most important genes ranked according to the 
-# Mean Decrease of Accuracy (measure of importance).
-# The red lines indicate the elbow of the curve. Genes above this threshold can 
-# be considered as the most important predictors for the RF. 
-# However, to avoid subjective thresholds, we used VarSelRF and boruta to select
-# the most important gens.
-
-#===============================================================================
-#        variable selection using boruta
-#===============================================================================
-# Variable selection using Boruta package (Caution: Execution time is 1:45 hours in a 16GB PC)
-set.seed(666)
+# Boruta 
 Bor <- Boruta(t(expr), factor(subgroup), pValue = 0.05)
 
 # Extract names of the selected attributes
 Best.Bor <- data.frame(getSelectedAttributes(Bor, withTentative = FALSE))
 colnames(Best.Bor) <- "Best"
-
-# For some reason, an "X" is prefixed before the name of the gene.
-# This code should eliminate the "X"
-Best.Bor$Best <- lapply(strsplit(as.character(Best.Bor$Best), "\\X"), "[", 2) 
 dim(Best.Bor) # 66 genes were selected by boruta
 head(Best.Bor)
 
@@ -412,7 +287,7 @@ venn(list(VarSelRF = Best.vars, Boruta = Best.Bor))
 ```
 
 ## **8.1 Export the results of Random Forest**
-```{r Step 7 Export results from RF,  warning=FALSE, message=FALSE}
+```{r}
 # Merge the genes from varselRF and boruta to get the genes in common (interSet)
 Best.Bor$Best <- as.character(Best.Bor$Best)
 Best.vars$Best <- as.character(Best.vars$Best)
@@ -441,12 +316,7 @@ venn(list(Previous = Best81, current = bestGenes))
 
 
 # **Step 9 Heatmap of the best genes**
-1. Extract expression set
-2. Match names of genes in expression set with names in the bestGenes dataframe
-3. Do the heatmap
-```{r step 9 Heatmap of best genes, warning=FALSE, message=FALSE}
-# Generates heatmap of the most important genes
-
+```{r}
 bestGenes <- read.csv("bestGenes.csv")
 B <- exprs(cancer.sub)
 dim(B)
@@ -455,8 +325,6 @@ keep <- subset(B, rownames(B) %in% bestGenes[,1])
 dim(keep)
 
 bt <- t(keep)
-
-hr <- heatmap.2(keep, labCol = label, scale = "row", col=greenred(75), ColSideColors = color, key = TRUE, symkey = FALSE, density.info = "none", trace = "none", main = "Heatmap for most important genes")
 
 hr <- heatmap.2(keep, labCol = label, scale = "row", col=greenred(75), key = TRUE, symkey = FALSE, density.info = "none", trace = "none", main = "Heatmap for most important genes")
 
@@ -527,7 +395,7 @@ draw.pairwise.venn(56, 34, 29, category = c("Boruta", "VarSelRF"), scaled = FALS
 
 
 # Step 10. Gene Ontology
-```{r step 10 Gene Ontology}
+```{r}
 #GO enrichment
 
 ls("package:hgu133plus2.db")
@@ -545,7 +413,7 @@ probeIds <- rownames(rat.rma)
 GOannot = mget(probeIds, hgu133plus2GO)
 notEmpty = function(x) {
   if (length(x) == 1 && is.na(x))
-  	FALSE
+    FALSE
 	else TRUE
 }
 
@@ -754,31 +622,8 @@ write.table(interRes_set2, file = "inter_GO_subset2.txt", sep = '\t')
 ```
 
 
-
-# Annotation (my initial attempt)
-```{r step 10 Gene Ontology, warning=FALSE, message=FALSE}
-best2 <- read.csv("bestGenes.csv")
-
-map <- getAnnMap("ENTREZID", "hgu133plus2", load=TRUE, type=c("env", "db"))
-
-ll <- getEG(as.character(best2[, 1]), "hgu133plus2.db")
-sym <- getSYMBOL(as.character(best2[, 1]), "hgu133plus2.db")
-
-tab <- data.frame(sym)
-
-# tab2 <- data.frame(sym, signif(tab[, -1], 3))
-
-tab <- data.frame(rownames(tab), tab)
-colnames(tab)[1] <- c("Probe ID") 
-
-tab <- tab[!is.na(tab)]
-
-
-```
-
-
 ## **Session Info** ##
-```{r, warning=FALSE, message=FALSE, error=FALSE}
+```{r}
 sessionInfo()
 
 gc()
