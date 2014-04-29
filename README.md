@@ -22,7 +22,7 @@ The following is the workflow of the data analysis and the person responsible fo
     * Density plots  
     * MVA plots  
 
-6) Exploratory analysis  **(HP)**  
+6) Exploratory analysis  **(YJ & HP)**  
     * K-means clustering  
     * HCA    
     * PCA  
