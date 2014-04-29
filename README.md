@@ -1,13 +1,15 @@
-This report correspond to the project for the class Stat597A Bioinformatics for High Throuhput Experiments during the Spring semester in 2014. The project is a collaboration between Hannier Pulido (HP) & Yong Jung (YJ)  
+This report correspond to the project for the class Stat597A Bioinformatics for High Throuhput Experiments during the Spring semester in 2014. The project is a collaboration between Yong Jung (YJ) & Hannier Pulido (HP).
 
 The following is the workflow of the data analysis and the person responsible for each step:  
 
-1) Access to CEL files **(HP)**  
+1) Access to CEL files **(YJ & HP)**
+
 2) Quality Assessment on raw data **(HP)**   
     * RNA degradation plots  
     * Boxplots  
     * Density plots  
-3) Preprocess data **(HP)**    
+
+3) Preprocess data **(YJ & HP)**    
     * Background correction and normalization  
     * Filtering absent genes  
     * Remove outliers and unidentified groups  
@@ -16,20 +18,19 @@ The following is the workflow of the data analysis and the person responsible fo
     * K-means clustering  
 
 5) Quality assessment of filtered data **(HP)**    
-    *Boxplots  
-    *Density plots  
-    *MVA plots  
+    * Boxplots  
+    * Density plots  
+    * MVA plots  
 
 6) Exploratory analysis  **(HP)**  
-    *HCA    
-    *PCA  
+    * K-means clustering  
+    * HCA    
+    * PCA  
 
-7) Random Forest **(HP)**  
+7) Random Forest for feature selection **(HP)**  
 
-8) Variable selection **(HP)**  
+8) Visualization of results **(YJ & HP)**  
 
-9) Visualization of results **(YJ & HP)**  
+9) Functional enrichment analysis using Gene Ontology  **(YJ)**  
 
-10) Functional enrichment analysis using Gene Ontology  **(YJ)**  
-
-11) Literature review using the GO terms **(YJ & HP)**  
+10) Literature review using the GO terms **(YJ & HP)**  
