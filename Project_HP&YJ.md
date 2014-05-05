@@ -406,7 +406,6 @@ interSet <- c("1559149_at", "1561341_at", "1562828_at", "201209_at", "201416_at"
 
 unionSet <- c("1555392_at", "1559149_at", "1561341_at", "1562828_at", "200715_x_at", "200903_s_at", "201209_at", "201416_at", "202719_s_at", "203576_at", "203607_at", "204457_s_at", "204546_at", "205637_s_at", "205667_at", "206017_at", "206456_at", "212288_at", "212774_at", "215028_at", "215047_at", "215531_s_at", "217626_at", "218479_s_at", "218736_s_at", "220111_s_at", "221798_x_at", "222725_s_at", "224539_s_at", "224955_at", "225381_at", "225512_at", "225955_at", "226049_at", "226796_at", "227439_at", "227785_at", "228665_at", "230902_at", "231325_at", "231631_at", "231776_at", "232003_at", "232069_at", "232113_at", "232286_at", "233546_at", "235004_at", "235044_at", "238850_at", "241411_at", "241881_at", "242527_at", "243428_at", "243435_at", "244370_at", "200807_s_at", "200845_s_at", "202260_s_at", "204105_s_at", "205378_s_at", "205493_s_at", "206186_at", "208692_at", "210271_at", "212713_at", "214925_s_at", "215290_at", "216132_at", "218394_at", "221883_at", "221923_s_at", "224092_at", "227290_at", "227441_s_at", "230019_s_at", "230765_at", "241505_at", "242959_at", "243521_at", "244076_at")
 
-
 a <- interSet
 
 probeIds <- rownames(rat.rma)
@@ -425,7 +424,11 @@ haveEntrezId <- sapply(entrezIds, function(x) !is.na(x))
 entrezFeatures = GoFeatures[haveEntrezId]
 
 require(genefilter)
+
+# Construction of a gene list that we want to enrich into GO
 EntrezSelect = names(findLargest(a, rnorm(length(a)), "hgu133plus2.db"))
+
+# Construction of the entire gene list in the microarray platform
 EntrezUniverse = names(findLargest(entrezFeatures, rnorm(length(entrezFeatures)), "hgu133plus2.db"))
 
 
@@ -435,11 +438,7 @@ InteractSigBPover = hyperGTest(InteractBPover)
 summaryTab = summary(InteractSigBPover)
 summaryTab[summaryTab$P <= 0.05, ]
 
-#get("GO:0006550", GOTERM)
-
 interRes <- summaryTab # inter_GO.txt
-
-
 
 a <- unionSet
 
@@ -462,23 +461,21 @@ require(genefilter)
 EntrezSelect = names(findLargest(a, rnorm(length(a)), "hgu133plus2.db"))
 EntrezUniverse = names(findLargest(entrezFeatures, rnorm(length(entrezFeatures)), "hgu133plus2.db"))
 
-
 InteractBPover = new("GOHyperGParams", geneIds = EntrezSelect, universeGeneIds = EntrezUniverse, annotation = "hgu133plus2.db", ontology = "BP", pvalueCutoff = 0.05, conditional = TRUE, testDirection = "over")
 InteractSigBPover = hyperGTest(InteractBPover)
 
 summaryTab = summary(InteractSigBPover)
 summaryTab[summaryTab$P <= 0.05, ]
 
-#get("GO:0006550", GOTERM)
-
 unionRes <- summaryTab # union_GO.txt
 write.table(unionRes, file = "union_GO.txt", sep = '\t')
 
 #After heatmap with unionSet
 
+# Subset 1 of union gene set
 unionSet_1 <- c("206456_at", "218736_s_at", "220111_s_at", "226796_at", "241505_at", "218479_s_at", "224539_s_at", "242527_at", "215047_at", "215531_s_at", "241881_at", "222725_s_at", "232069_at", "235044_at", "228665_at", "212713_at", "243428_at", "203576_at", "205667_at", "243435_at", "215028_at", "204457_s_at", "232286_at", "241411_at", "201209_at", "200903_s_at", "221923_s_at", "230765_at", "1559149_at", "235004_at", "206186_at", "242959_at", "227441_s_at", "227290_at")
 
-
+# Subset 1 of union gene set
 unionSet_2 <- c("232003_at", "204546_at", "231631_at", "217626_at", "1555392_at", "206017_at", "216132_at", "205378_s_at", "202719_s_at", "244076_at", "243521_at", "225955_at", "233546_at", "204105_s_at", "200845_s_at", "224955_at", "238850_at", "205493_s_at", "212288_at", "202260_s_at", "212774_at", "201416_at", "200715_x_at", "200807_s_at", "208692_at", "221798_x_at", "231776_at", "225381_at", "232113_at", "230902_at", "215290_at", "1561341_at", "1562828_at", "231325_at", "224092_at", "244370_at", "205637_s_at", "218394_at", "210271_at", "230019_s_at", "227785_at", "214925_s_at", "227439_at", "203607_at", "225512_at", "226049_at", "221883_at")
 
 a <- unionSet_1
@@ -502,14 +499,11 @@ require(genefilter)
 EntrezSelect = names(findLargest(a, rnorm(length(a)), "hgu133plus2.db"))
 EntrezUniverse = names(findLargest(entrezFeatures, rnorm(length(entrezFeatures)), "hgu133plus2.db"))
 
-
 InteractBPover = new("GOHyperGParams", geneIds = EntrezSelect, universeGeneIds = EntrezUniverse, annotation = "hgu133plus2.db", ontology = "BP", pvalueCutoff = 0.05, conditional = TRUE, testDirection = "over")
 InteractSigBPover = hyperGTest(InteractBPover)
 
 summaryTab = summary(InteractSigBPover)
 summaryTab[summaryTab$P <= 0.05, ]
-
-#get("GO:0006550", GOTERM)
 
 unionRes_set1 <- summaryTab # union_GO_subset1.txt
 write.table(unionRes_set1, file = "union_GO_subset1.txt", sep = '\t')
@@ -542,16 +536,15 @@ InteractSigBPover = hyperGTest(InteractBPover)
 summaryTab = summary(InteractSigBPover)
 summaryTab[summaryTab$P <= 0.05, ]
 
-#get("GO:0006550", GOTERM)
-
 unionRes_set2 <- summaryTab # union_GO_subset2.txt
 write.table(unionRes_set2, file = "union_GO_subset2.txt", sep = '\t')
 
-
 #After heatmap with interSet
 
+# Subset 1 of intersection gene set
 interSet_1 <- c("210271_at", "203576_at", "1562828_at", "212288_at", "200845_s_at", "201416_at", "212713_at", "1555392_at", "206456_at", "205667_at", "203607_at", "200807_s_at", "204546_at", "206186_at", "202260_s_at")
 
+# Subset 2 of intersection gene set
 interSet_2 <- c("208692_at", "204105_s_at", "202719_s_at", "200715_x_at", "206017_at", "1559149_at", "1561341_at", "205637_s_at", "212774_at", "205493_s_at", "201209_at", "200903_s_at", "205378_s_at", "204457_s_at")
 
 a <- interSet_1
@@ -582,8 +575,6 @@ InteractSigBPover = hyperGTest(InteractBPover)
 summaryTab = summary(InteractSigBPover)
 summaryTab[summaryTab$P <= 0.05, ]
 
-#get("GO:0006550", GOTERM)
-
 interRes_set1 <- summaryTab # union_GO_subset1.txt
 write.table(interRes_set1, file = "inter_GO_subset1.txt", sep = '\t')
 
@@ -608,14 +599,11 @@ require(genefilter)
 EntrezSelect = names(findLargest(a, rnorm(length(a)), "hgu133plus2.db"))
 EntrezUniverse = names(findLargest(entrezFeatures, rnorm(length(entrezFeatures)), "hgu133plus2.db"))
 
-
 InteractBPover = new("GOHyperGParams", geneIds = EntrezSelect, universeGeneIds = EntrezUniverse, annotation = "hgu133plus2.db", ontology = "BP", pvalueCutoff = 0.05, conditional = TRUE, testDirection = "over")
 InteractSigBPover = hyperGTest(InteractBPover)
 
 summaryTab = summary(InteractSigBPover)
 summaryTab[summaryTab$P <= 0.05, ]
-
-#get("GO:0006550", GOTERM)
 
 interRes_set2 <- summaryTab # union_GO_subset2.txt
 write.table(interRes_set2, file = "inter_GO_subset2.txt", sep = '\t')
